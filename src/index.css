@@ -1,0 +1,113 @@
+
+body {
+  font-family: Roboto, sans-serif;
+}
+
+.trigger {
+  padding: 0 24px;
+  font-size: 18px;
+  line-height: 64px;
+  cursor: pointer;
+  transition: color 0.3s;
+  }
+
+  .trigger:hover {
+  color: #1890ff;
+  }
+  
+  .logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.3);
+  }
+
+  .ant-layout {
+    min-height: 100vh;
+  }
+
+  .ant-layout-sider {
+    flex: 0 0 250px !important;
+    max-width: 250px !important;
+    min-width: 250px !important;
+    width: 250px !important;
+    }
+
+    .ant-layout-sider-collapsed {
+    flex: 00 80px !important;
+    max-width: 80px !important;
+    min-width: 80px !important;
+    width: 80px!important;
+    }
+
+  .logo {
+    background-color: #a9cff3;
+    margin: 0;
+    height: 64px;
+  }
+
+  main {
+    height: 85vh;
+    overflow-y: scroll;
+    background-color: transparent !important;
+  }
+
+  main::-webkit-scrollbar {
+    width: 0px;
+  }
+
+  .ant-menu-title-content {
+    font-size: 16px;
+  }
+
+  .ant-layout-header h5 {
+    line-height: 20px;
+    font-size: 14px;
+    }
+    
+  .ant-layout-header p {
+    line-height: 20px;
+    font-size: 12px;
+  }
+
+  .ant-layout-header div .badge {
+    top: 16px;
+    right: 250px;
+  }
+
+  .error {
+    color:red;
+    font-size: 12px;
+  }
+
+    /* Đặt các phần tử hình ảnh và mô tả nằm ngang */
+    .column {
+      display: flex;
+      justify-content: space-between;
+      /* Đảm bảo các phần tử có khoảng cách đều */
+      gap: 20px;
+      /* Tạo khoảng cách giữa hình ảnh và mô tả */
+      align-items: center;
+      /* Căn giữa theo chiều dọc */
+      padding: 10px 0;
+    }
+  
+    /* Thêm kẽ ngang giữa các phần (Hình ảnh và Mô tả) */
+    .column>div {
+      padding-right: 20px;
+      /* Tạo khoảng cách giữa hình ảnh và mô tả */
+    }
+  
+    .column img {
+      max-width: 80px;
+      /* Giới hạn kích thước ảnh */
+      margin-right: 15px;
+      /* Khoảng cách giữa hình ảnh và mô tả */
+    }
+  
+    /* Đảm bảo phần mô tả không bị tràn */
+    .column .description {
+      flex-grow: 1;
+      /* Cho phép phần mô tả mở rộng */
+      word-wrap: break-word;
+      /* Đảm bảo văn bản không bị tràn */
+    }

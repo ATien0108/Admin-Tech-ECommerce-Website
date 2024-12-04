@@ -1,0 +1,13 @@
+/* styles.css */
+.image-container {
+    width: 100%; /* Chiều rộng của hình ảnh */
+    height: 200px; /* Chiều cao của hình ảnh */
+    overflow: hidden; /* Ẩn phần hình ảnh vượt quá */
+  }
+  
+  .image-container img {
+    width: 100%; /* Chiều rộng 100% của khung chứa */
+    height: 100%; /* Chiều cao 100% của khung chứa */
+    object-fit: cover; /* Cắt hình ảnh để phù hợp với khung */
+  }
+  
