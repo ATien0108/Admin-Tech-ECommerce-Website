@@ -6,7 +6,7 @@ Dự án này được khởi tạo với [Create React App](https://github.com/
 
 Mở Terminal hoặc CMD.\
 Chọn nơi lưu trữ dự án.\
-Nhập câu lệnh: git clone https://github.com/DyyyPhatt/Tech-ECommerce-Website.git.\
+Nhập câu lệnh: git clone https://github.com/DyyyPhatt/Tech-ECommerce-Website.git .\
 Sau khi đã git clone thành công, tiến hành giải nén cho file.\
 Sau khi giải nén xong, mở folder đã được giải nén với **Visual Studio Code**.\
 Chọn New Terminal và thực hiện nhập câu lệnh **npm install** để cài đặt các phụ thuộc của dự án.\
