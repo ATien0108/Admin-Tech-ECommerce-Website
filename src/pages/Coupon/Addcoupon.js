@@ -65,7 +65,7 @@ const AddCoupon = () => {
       (discountType === "PERCENTAGE" && discountValue > 100)
     ) {
       message.error(
-        "Giá trị giảm giá (PERCENTAGE) phải nằm trong khoảng 1 đến 100."
+        "Giá trị giảm giá (Phần trăm) phải nằm trong khoảng 1 đến 100."
       );
       return;
     }
@@ -85,13 +85,13 @@ const AddCoupon = () => {
     if (discountType === "FIXED") {
       if (maxDiscountAmount > discountValue) {
         message.error(
-          "Số tiền giảm tối đa không được lớn hơn Giá trị giảm giá khi loại giảm giá là FIXED."
+          "Số tiền giảm tối đa không được lớn hơn Giá trị giảm giá khi loại giảm giá là Số tiền cố định."
         );
         return;
       }
       if (discountValue >= minimumOrderAmount) {
         message.error(
-          "Giá trị giảm giá phải nhỏ hơn Số tiền đơn hàng tối thiểu khi loại giảm giá là FIXED."
+          "Giá trị giảm giá phải nhỏ hơn Số tiền đơn hàng tối thiểu khi loại giảm giá là Số tiền cố định."
         );
         return;
       }
@@ -195,7 +195,7 @@ const AddCoupon = () => {
                   (value < 1 || value > 100)
                 ) {
                   message.error(
-                    "Giá trị giảm giá (PERCENTAGE) phải nằm trong khoảng 1 đến 100."
+                    "Giá trị giảm giá (Phần trăm) phải nằm trong khoảng 1 đến 100."
                   );
                   return;
                 }

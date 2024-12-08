@@ -18,6 +18,8 @@ const EditEmployee = () => {
   const [employeeId, setEmployeeId] = useState(null);
   const [usernameExists, setUsernameExists] = useState(false);
   const location = useLocation();
+  const [emailError, setEmailError] = useState(false);
+
   const searchText = location.state?.searchText || "";
 
   useEffect(() => {
@@ -62,6 +64,13 @@ const EditEmployee = () => {
     // Kiểm tra dữ liệu
     if (!username || !email || !phoneNumber || !role) {
       message.error("Vui lòng điền đầy đủ thông tin.");
+      return;
+    }
+
+    // Kiểm tra định dạng email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      message.error("Định dạng email không hợp lệ.");
       return;
     }
 

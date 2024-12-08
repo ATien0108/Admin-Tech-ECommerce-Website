@@ -247,7 +247,8 @@ const OrderDetails = () => {
             <Card title="Mã giảm giá" className="mt-3">
               <Text>{order.coupon}</Text>
               <br />
-              <Text strong>Giá giảm: </Text> {order.couponDiscount}
+              <Text strong>Giá giảm: </Text>{" "}
+              {formatCurrency(order.couponDiscount)}
             </Card>
           )}
 

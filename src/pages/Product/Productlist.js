@@ -233,6 +233,8 @@ const Productlist = () => {
     {
       title: "STT",
       dataIndex: "key",
+      render: (_, __, index) => index + 1,
+
       align: "center",
     },
     {

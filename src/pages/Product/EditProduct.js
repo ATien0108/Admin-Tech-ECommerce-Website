@@ -143,8 +143,22 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Kiểm tra giá trị âm cho giá sản phẩm và giá giảm
+    if (parseFloat(price) < 0 || parseFloat(discountPrice) < 0) {
+      message.error("Giá sản phẩm và giá giảm không được là số âm.");
+      return;
+    }
+
+    // Kiểm tra giá giảm lớn hơn hoặc bằng giá sản phẩm
     if (parseFloat(discountPrice) >= parseFloat(price)) {
-      message.error("Giá giảm phải nhỏ hơn giá gốc");
+      message.error("Giá giảm phải nhỏ hơn giá sản phẩm.");
+      return;
+    }
+
+    // Kiểm tra số lượng màu sắc không được là số âm
+    const invalidColors = colors.filter((color) => color.quantity < 0);
+    if (invalidColors.length > 0) {
+      message.error("Số lượng màu sắc không được là số âm.");
       return;
     }
 

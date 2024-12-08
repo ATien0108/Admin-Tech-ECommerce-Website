@@ -148,7 +148,21 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Kiểm tra các trường bắt buộc và giá trị hợp lệ (giống phần trước)
+    // Kiểm tra các trường bắt buộc và giá trị hợp lệ
+    if (price <= 0) {
+      message.error("Giá sản phẩm phải lớn hơn 0.");
+      return;
+    }
+
+    if (discountPrice < 0) {
+      message.error("Giá giảm không được là số âm.");
+      return;
+    }
+
+    if (discountPrice >= price) {
+      message.error("Giá giảm phải nhỏ hơn Giá sản phẩm.");
+      return;
+    }
 
     // Chuẩn bị dữ liệu
     const productData = {
@@ -246,6 +260,7 @@ const AddProduct = () => {
               placeholder="Nhập Giá Sản Phẩm"
               required
               step="any"
+              min="0.01" // Giá trị tối thiểu
             />
           </div>
           <div className="col-md-6 mb-3">
@@ -261,6 +276,7 @@ const AddProduct = () => {
               placeholder="Nhập Giá Giảm"
               required
               step="any"
+              min="0" // Giá trị tối thiểu
             />
           </div>
         </div>
