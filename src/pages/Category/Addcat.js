@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { message } from "antd";
+import { message, Button } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const AddCategory = () => {
   const [cateName, setCateName] = useState("");
@@ -9,6 +9,8 @@ const AddCategory = () => {
   const [cateImage, setCateImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -132,6 +134,16 @@ const AddCategory = () => {
             >
               {isLoading ? "Đang thêm..." : "Thêm"}
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/category-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Danh Mục
+            </Button>
           </div>
         </div>
       </form>

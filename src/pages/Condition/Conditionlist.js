@@ -7,16 +7,24 @@ import {
   Button,
   notification,
   Modal,
+  Menu,
+  Dropdown,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
+const { Search } = Input;
+
 const Conditionlist = () => {
-  const [searchText, setSearchText] = useState("");
   const [conditions, setConditions] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchText, setSearchText] = useState(
+    location.state?.searchText || ""
+  );
+  const [searchHistory, setSearchHistory] = useState([]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -44,19 +52,44 @@ const Conditionlist = () => {
   };
 
   // Handle search
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
+
+  const handleSearch = (value) => {
     setSearchText(value);
 
+    // Lọc dữ liệu theo từ khóa tìm kiếm
     const filtered = conditions.filter((item) =>
-      item.conditionName.toLowerCase().includes(value)
+      item.conditionName.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredData(filtered);
+
+    if (value && !searchHistory.includes(value)) {
+      // Cập nhật lịch sử tìm kiếm nếu giá trị mới
+      setSearchHistory((prevHistory) => [value, ...prevHistory].slice(0, 5)); // Lưu tối đa 5 lịch sử
+    }
   };
+
+  useEffect(() => {
+    const filtered = conditions.filter((item) =>
+      item.conditionName.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [searchText, conditions]);
+
+  const menu = (
+    <Menu>
+      {searchHistory.map((item, index) => (
+        <Menu.Item key={index} onClick={() => setSearchText(item)}>
+          {item}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   // Handle edit
   const handleEdit = (record) => {
-    navigate(`/admin/edit-condition/${record.conditionName}`);
+    navigate(`/admin/edit-condition/${record.conditionName}`, {
+      state: { searchText },
+    });
   };
 
   const handleDelete = async (id) => {
@@ -171,7 +204,7 @@ const Conditionlist = () => {
 
   // Navigate to add brand page
   const handleAddCondition = () => {
-    navigate("/admin/add-condition");
+    navigate("/admin/add-condition", { state: { searchText } });
   };
 
   const columns = [
@@ -246,12 +279,17 @@ const Conditionlist = () => {
       <h3 className="mb-4 title">Danh Sách Tình Trạng</h3>
       <div className="row mb-3">
         <div className="col-md-6">
-          <Input
-            placeholder="Tìm kiếm theo tên tình trạng"
-            value={searchText}
-            onChange={handleSearch}
-            style={{ width: 300 }}
-          />
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <div>
+              <Search
+                placeholder="Tìm kiếm theo tên tình trạng"
+                value={searchText}
+                onSearch={handleSearch}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+              />
+            </div>
+          </Dropdown>
         </div>
         <div className="col-md-6 text-end">
           <Button type="primary" onClick={handleAddCondition}>

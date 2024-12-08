@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { message } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { message, Button } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import axios from "axios";
@@ -8,6 +8,8 @@ import axios from "axios";
 const EditBlog = () => {
   const { id } = useParams(); // ID blog từ URL
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -182,6 +184,17 @@ const EditBlog = () => {
               <button type="submit" className="btn btn-success">
                 Lưu
               </button>
+            </div>
+
+            <div className="text-start mt-5">
+              <Button
+                type="primary"
+                onClick={() =>
+                  navigate("/admin/blog-list", { state: { searchText } })
+                }
+              >
+                Quay lại Danh Bài Viết
+              </Button>
             </div>
           </div>
         </form>

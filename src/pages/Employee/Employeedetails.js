@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Card, Spin, notification, Typography, Divider, Row, Col } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import {
+  Card,
+  Spin,
+  notification,
+  Typography,
+  Divider,
+  Row,
+  Col,
+  Button,
+} from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 
@@ -11,6 +20,8 @@ const EmployeeDetails = () => {
   const [employeeData, setEmployeeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Hàm lấy thông tin nhân viên từ API
   useEffect(() => {
@@ -65,23 +76,12 @@ const EmployeeDetails = () => {
       >
         <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
-            <Text strong>Tên nhân viên: </Text>
-            <Text>{employeeData.username}</Text>
-          </Col>
-          <Col xs={24} md={12}>
             <Text strong>Email: </Text>
             <Text>{employeeData.email}</Text>
           </Col>
-        </Row>
-        <Divider />
-        <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
             <Text strong>Số điện thoại: </Text>
             <Text>{employeeData.phoneNumber || "N/A"}</Text>
-          </Col>
-          <Col xs={24} md={12}>
-            <Text strong>Vai trò: </Text>
-            <Text>{employeeData.role}</Text>
           </Col>
         </Row>
         <Divider />
@@ -96,6 +96,16 @@ const EmployeeDetails = () => {
           </Col>
         </Row>
       </Card>
+      <div style={{ display: "flex", justifyContent: "left" }}>
+        <Button
+          type="primary"
+          onClick={() =>
+            navigate("/admin/employee-list", { state: { searchText } })
+          }
+        >
+          Quay lại Danh Sách Nhân Viên
+        </Button>
+      </div>
     </div>
   );
 };

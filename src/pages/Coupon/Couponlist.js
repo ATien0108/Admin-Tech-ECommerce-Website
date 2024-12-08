@@ -8,17 +8,25 @@ import {
   notification,
   Modal,
   Spin,
+  Menu,
+  Dropdown,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
+const { Search } = Input;
+
 const Couponlist = () => {
-  const [searchText, setSearchText] = useState("");
   const [coupons, setCoupons] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchText, setSearchText] = useState(
+    location.state?.searchText || ""
+  );
+  const [searchHistory, setSearchHistory] = useState([]);
 
   // Format ngày
   const formatDate = (dateString) => {
@@ -56,19 +64,41 @@ const Couponlist = () => {
   };
 
   // Xử lý tìm kiếm
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
+  const handleSearch = (value) => {
     setSearchText(value);
 
+    // Lọc dữ liệu theo từ khóa tìm kiếm
     const filtered = coupons.filter((item) =>
-      item.code.toLowerCase().includes(value)
+      item.code.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredData(filtered);
+
+    if (value && !searchHistory.includes(value)) {
+      // Cập nhật lịch sử tìm kiếm nếu giá trị mới
+      setSearchHistory((prevHistory) => [value, ...prevHistory].slice(0, 5)); // Lưu tối đa 5 lịch sử
+    }
   };
+
+  useEffect(() => {
+    const filtered = coupons.filter((item) =>
+      item.code.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [searchText, coupons]);
+
+  const menu = (
+    <Menu>
+      {searchHistory.map((item, index) => (
+        <Menu.Item key={index} onClick={() => setSearchText(item)}>
+          {item}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   // Xử lý chỉnh sửa
   const handleEdit = (record) => {
-    navigate(`/admin/edit-coupon/${record.id}`);
+    navigate(`/admin/edit-coupon/${record.id}`, { state: { searchText } });
   };
 
   // Xử lý xóa coupon
@@ -99,7 +129,7 @@ const Couponlist = () => {
 
   // Chuyển đến trang thêm coupon
   const handleAddCoupon = () => {
-    navigate("/admin/add-coupon");
+    navigate("/admin/add-coupon", { state: { searchText } });
   };
 
   const columns = [
@@ -116,27 +146,6 @@ const Couponlist = () => {
       key: "code",
       width: "15%",
       align: "center",
-    },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      width: "30%",
-      align: "center",
-      render: (text) => (
-        <div
-          style={{
-            textAlign: "left",
-            display: "-webkit-box",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {text}
-        </div>
-      ),
     },
     {
       title: "Loại giảm giá",
@@ -229,12 +238,17 @@ const Couponlist = () => {
       <h3 className="mb-4 title">Danh Sách Mã Giảm Giá</h3>
       <div className="row mb-3">
         <div className="col-md-6">
-          <Input
-            placeholder="Tìm kiếm theo mã giảm giá"
-            value={searchText}
-            onChange={handleSearch}
-            style={{ width: 300 }}
-          />
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <div>
+              <Search
+                placeholder="Tìm kiếm theo tên mã giảm giá"
+                value={searchText}
+                onSearch={handleSearch}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+              />
+            </div>
+          </Dropdown>
         </div>
         <div className="col-md-6 text-end">
           <Button type="primary" onClick={handleAddCoupon}>

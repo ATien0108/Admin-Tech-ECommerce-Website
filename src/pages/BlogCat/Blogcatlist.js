@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Space, Popconfirm, Button, notification } from "antd";
+import {
+  Table,
+  Input,
+  Space,
+  Popconfirm,
+  Button,
+  notification,
+  Menu,
+  Dropdown,
+} from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+const { Search } = Input;
+
 const Blogcatlist = () => {
-  const [searchText, setSearchText] = useState("");
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchText, setSearchText] = useState(
+    location.state?.searchText || ""
+  );
+  const [searchHistory, setSearchHistory] = useState([]);
 
   useEffect(() => {
     fetchCategories();
@@ -27,19 +42,40 @@ const Blogcatlist = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
+  const handleSearch = (value) => {
     setSearchText(value);
 
     // Lọc dữ liệu theo từ khóa tìm kiếm
     const filtered = data.filter((item) =>
-      item.cateBlogName.toLowerCase().includes(value)
+      item.cateBlogName.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredData(filtered);
+
+    if (value && !searchHistory.includes(value)) {
+      // Cập nhật lịch sử tìm kiếm nếu giá trị mới
+      setSearchHistory((prevHistory) => [value, ...prevHistory].slice(0, 5)); // Lưu tối đa 5 lịch sử
+    }
   };
 
+  useEffect(() => {
+    const filtered = data.filter((item) =>
+      item.cateBlogName.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [searchText]);
+
+  const menu = (
+    <Menu>
+      {searchHistory.map((item, index) => (
+        <Menu.Item key={index} onClick={() => setSearchText(item)}>
+          {item}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
+
   const handleEdit = (record) => {
-    navigate(`/admin/edit-blog-cat/${record.id}`); // Điều hướng tới trang chỉnh sửa với ID
+    navigate(`/admin/edit-blog-cat/${record.id}`, { state: { searchText } }); // Điều hướng tới trang chỉnh sửa với ID
   };
 
   const handleDelete = async (id) => {
@@ -70,7 +106,7 @@ const Blogcatlist = () => {
   };
 
   const handleAddBlogCat = () => {
-    navigate("/admin/add-blog-category");
+    navigate("/admin/add-blog-category", { state: { searchText } });
   };
 
   const columns = [
@@ -147,15 +183,20 @@ const Blogcatlist = () => {
 
   return (
     <div className="container">
-      <h3 className="mb-4 title">Danh Sách Danh Mục Blog</h3>
+      <h3 className="mb-4 title">Danh Sách Danh Mục Bài Viết</h3>
       <div className="row mb-3">
         <div className="col-md-6">
-          <Input
-            placeholder="Tìm kiếm theo tên danh mục bài viết"
-            value={searchText}
-            onChange={handleSearch}
-            style={{ width: 300 }}
-          />
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <div>
+              <Search
+                placeholder="Tìm kiếm theo tên danh mục bài viết"
+                value={searchText}
+                onSearch={handleSearch}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+              />
+            </div>
+          </Dropdown>
         </div>
         <div className="col-md-6 text-end">
           <Button

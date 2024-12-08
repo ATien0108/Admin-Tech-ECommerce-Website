@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { message } from "antd";
+import { message, Button } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const AddEmployee = () => {
@@ -11,10 +11,12 @@ const AddEmployee = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [role, setRole] = useState("");
   const [usernameExists, setUsernameExists] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchText = location.state?.searchText || "";
 
   // Lưu trạng thái lỗi
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
 
   const checkUsername = async (username) => {
     try {
@@ -195,16 +197,20 @@ const AddEmployee = () => {
               <option value="" disabled>
                 Chọn vai trò...
               </option>
-              <option value="Manager">Quản lý</option>
-              <option value="Sales Associate">Cộng tác viên bán hàng</option>
-              <option value="Warehouse Staff">Nhân viên kho</option>
-              <option value="Customer Service">Dịch vụ khách hàng</option>
-              <option value="Accountant">Kế toán viên</option>
-              <option value="IT Support">Hỗ trợ CNTT</option>
+              <option value="Quản lý">Quản lý</option>
+              <option value="Cộng tác viên bán hàng">
+                Cộng tác viên bán hàng
+              </option>
+              <option value="Nhân viên kho">Nhân viên kho</option>
+              <option value="Dịch vụ khách hàng">Dịch vụ khách hàng</option>
+              <option value="Kế toán viên">Kế toán viên</option>
+              <option value="Hỗ trợ CNTT">Hỗ trợ CNTT</option>
               <option value="Logistics">Logistics</option>
-              <option value="Marketing">Tiếp thị</option>
-              <option value="HR Specialist">Chuyên gia nhân sự</option>
-              <option value="Business Analyst">Nhà phân tích kinh doanh</option>
+              <option value="Tiếp thị">Tiếp thị</option>
+              <option value="Chuyên gia nhân sự">Chuyên gia nhân sự</option>
+              <option value="Nhà phân tích kinh doanh">
+                Nhà phân tích kinh doanh
+              </option>
             </select>
             {errors.role && (
               <div className="invalid-feedback">{errors.role}</div>
@@ -217,6 +223,16 @@ const AddEmployee = () => {
             <button type="submit" className="btn btn-success btn-lg w-20">
               Thêm
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/employee-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Nhân Viên
+            </Button>
           </div>
         </div>
       </form>

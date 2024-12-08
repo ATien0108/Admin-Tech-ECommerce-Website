@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import ReactQuill from "react-quill"; // Import ReactQuill
 import "react-quill/dist/quill.snow.css"; // Import CSS for ReactQuill
-import { message } from "antd"; // Import message component from Ant Design
+import { message, Button } from "antd"; // Import message component from Ant Design
 import axios from "axios"; // Import axios for API calls
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { useNavigate, useLocation } from "react-router-dom"; // Import useNavigate for navigation
 
 const Addtag = () => {
   const [name, setName] = useState("");
   const navigate = useNavigate(); // Initialize navigate for redirection
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,6 +79,16 @@ const Addtag = () => {
               <button type="submit" className="btn btn-success">
                 Thêm
               </button>
+            </div>
+            <div className="text-start mt-5">
+              <Button
+                type="primary"
+                onClick={() =>
+                  navigate("/admin/tag-list", { state: { searchText } })
+                }
+              >
+                Quay lại Danh Sách Nhãn
+              </Button>
             </div>
           </div>
         </form>

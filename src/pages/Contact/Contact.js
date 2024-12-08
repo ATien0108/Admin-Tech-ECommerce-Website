@@ -31,15 +31,6 @@ const Contact = () => {
     navigate(`/admin/edit-contact/${record.id}`, { state: { id: record.id } });
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:8081/api/contact/delete/${id}`);
-      fetchContacts(); // Cập nhật lại danh sách sau khi xóa
-    } catch (error) {
-      console.error("Đã có lỗi khi xóa liên hệ!", error);
-    }
-  };
-
   const columns = [
     { title: "STT", render: (_, __, index) => index + 1, align: "center" },
     {
@@ -95,14 +86,6 @@ const Contact = () => {
             onClick={() => handleEdit(record)}
             style={{ cursor: "pointer", color: "blue" }}
           />
-          <Popconfirm
-            title="Bạn chắc chắn muốn xóa liên hệ này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <DeleteOutlined style={{ cursor: "pointer", color: "red" }} />
-          </Popconfirm>
         </Space>
       ),
       align: "center",

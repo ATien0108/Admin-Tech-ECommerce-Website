@@ -1,17 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { Table, Input, Space, Popconfirm, Button, notification } from "antd";
+import {
+  Table,
+  Input,
+  Space,
+  Popconfirm,
+  Button,
+  notification,
+  Menu,
+  Dropdown,
+} from "antd";
 import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+const { Search } = Input;
+
 const BlogList = () => {
-  const [searchText, setSearchText] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [blogs, setBlogs] = useState([]);
   const [authors, setAuthors] = useState({});
   const [categories, setCategories] = useState({});
+  const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
+  const pageSize = 10; // Số bản ghi mỗi trang
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchText, setSearchText] = useState(
+    location.state?.searchText || ""
+  );
+  const [searchHistory, setSearchHistory] = useState([]);
 
   useEffect(() => {
     fetchBlogs();
@@ -66,32 +83,54 @@ const BlogList = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    setSearchText(e.target.value);
+  const handleSearch = (value) => {
+    setSearchText(value);
+
+    // Lọc dữ liệu theo từ khóa tìm kiếm
+    const filtered = blogs.filter((item) =>
+      item.title.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredData(filtered);
+
+    if (value && !searchHistory.includes(value)) {
+      // Cập nhật lịch sử tìm kiếm nếu giá trị mới
+      setSearchHistory((prevHistory) => [value, ...prevHistory].slice(0, 5)); // Lưu tối đa 5 lịch sử
+    }
   };
 
+  useEffect(() => {
+    const filtered = blogs.filter((item) =>
+      item.title.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [searchText, blogs]);
+
+  const menu = (
+    <Menu>
+      {searchHistory.map((item, index) => (
+        <Menu.Item key={index} onClick={() => setSearchText(item)}>
+          {item}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
+
   const handleEdit = (record) => {
-    navigate(`/admin/edit-blog/${record.id}`);
+    navigate(`/admin/edit-blog/${record.id}`, { state: { searchText } });
   };
 
   const handleDelete = async (id) => {
     try {
-      // Gửi yêu cầu xóa bài viết đến API
       await axios.delete(`http://localhost:8081/api/blogs/delete/${id}`);
-
-      // Cập nhật lại danh sách bài viết trong state
       setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
       setFilteredData((prevFilteredData) =>
         prevFilteredData.filter((blog) => blog.id !== id)
       );
-
-      // Thông báo thành công
       notification.success({
         message: "Thành công",
         description: "Đã xóa bài viết thành công.",
       });
     } catch (error) {
-      // Xử lý lỗi và thông báo cho người dùng
       notification.error({
         message: "Lỗi xóa bài viết",
         description: error.message || "Đã xảy ra lỗi!",
@@ -100,17 +139,21 @@ const BlogList = () => {
   };
 
   const handleAddBlog = () => {
-    navigate("/admin/add-blog");
+    navigate("/admin/add-blog", { state: { searchText } });
   };
 
   const handleView = (record) => {
-    navigate(`/admin/blog-detail/${record.id}`);
+    navigate(`/admin/blog-detail/${record.id}`, { state: { searchText } });
+  };
+
+  const handlePaginationChange = (page) => {
+    setCurrentPage(page);
   };
 
   const columns = [
     {
       title: "STT",
-      render: (_, __, index) => index + 1, // Hiển thị số thứ tự
+      render: (_, __, index) => (currentPage - 1) * pageSize + index + 1, // Tính số thứ tự chính xác theo trang
       width: "5%",
       align: "center",
     },
@@ -128,48 +171,11 @@ const BlogList = () => {
       render: (authorId) => authors[authorId] || "Không rõ",
     },
     {
-      title: <div style={{ textAlign: "center" }}>Nội dung</div>,
-      dataIndex: "content",
-      width: "25%", // Giảm chiều rộng của cột
-      render: (text) => (
-        <div
-          style={{
-            textAlign: "left",
-            display: "-webkit-box", // Đảm bảo phần tử là box
-            overflow: "hidden", // Ẩn phần tràn
-            textOverflow: "ellipsis", // Hiển thị dấu ba chấm khi bị cắt
-            WebkitLineClamp: 2, // Giới hạn số dòng (2 dòng trong trường hợp này)
-            WebkitBoxOrient: "vertical", // Đảm bảo văn bản chỉ hiển thị theo chiều dọc
-            height: "50px", // Chiều cao cố định cho ô
-            lineHeight: "25px", // Căn chỉnh văn bản theo chiều dọc
-          }}
-          dangerouslySetInnerHTML={{
-            __html: text,
-          }}
-        />
-      ),
-    },
-
-    {
       title: "Danh mục",
       dataIndex: "category",
       width: "10%",
       align: "center",
       render: (categoryId) => categories[categoryId] || "Không danh mục",
-    },
-    {
-      title: "Ngày xuất bản",
-      dataIndex: "publishedDate",
-      render: (text) => new Date(text).toLocaleDateString(),
-      width: "10%",
-      align: "center",
-    },
-    {
-      title: "Ngày cập nhật",
-      dataIndex: "updatedAt",
-      render: (text) => new Date(text).toLocaleDateString(),
-      width: "10%",
-      align: "center",
     },
     {
       title: "Hình ảnh",
@@ -193,7 +199,20 @@ const BlogList = () => {
       width: "10%",
       align: "center",
     },
-
+    {
+      title: "Ngày xuất bản",
+      dataIndex: "publishedDate",
+      render: (text) => new Date(text).toLocaleDateString(),
+      width: "10%",
+      align: "center",
+    },
+    {
+      title: "Ngày cập nhật",
+      dataIndex: "updatedAt",
+      render: (text) => new Date(text).toLocaleDateString(),
+      width: "10%",
+      align: "center",
+    },
     {
       title: "Hành động",
       render: (_, record) => (
@@ -226,12 +245,17 @@ const BlogList = () => {
       <h3 className="mb-4 title">Danh sách bài viết</h3>
       <div className="row mb-3">
         <div className="col-md-6">
-          <Input
-            placeholder="Tìm kiếm theo tiêu đề"
-            value={searchText}
-            onChange={handleSearch}
-            style={{ width: 300 }}
-          />
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <div>
+              <Search
+                placeholder="Tìm kiếm theo tiêu đề"
+                value={searchText}
+                onSearch={handleSearch}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+              />
+            </div>
+          </Dropdown>
         </div>
         <div className="col-md-6 text-end">
           <Button type="primary" onClick={handleAddBlog}>
@@ -242,7 +266,12 @@ const BlogList = () => {
       <Table
         columns={columns}
         dataSource={filteredData}
-        pagination={{ pageSize: 10 }}
+        pagination={{
+          pageSize,
+          current: currentPage,
+          onChange: handlePaginationChange,
+          total: filteredData.length,
+        }}
         bordered
       />
     </div>

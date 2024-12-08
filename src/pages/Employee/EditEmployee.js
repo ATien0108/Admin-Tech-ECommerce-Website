@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { message, Spin } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { message, Spin, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -17,6 +17,8 @@ const EditEmployee = () => {
   const [updatedAt, setUpdatedAt] = useState("");
   const [employeeId, setEmployeeId] = useState(null);
   const [usernameExists, setUsernameExists] = useState(false);
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   useEffect(() => {
     axios
@@ -163,16 +165,20 @@ const EditEmployee = () => {
             className="form-control"
             onChange={(e) => setRole(e.target.value)}
           >
-            <option value="Manager">Quản lý</option>
-            <option value="Sales Associate">Cộng tác viên bán hàng</option>
-            <option value="Warehouse Staff">Nhân viên kho</option>
-            <option value="Customer Service">Dịch vụ khách hàng</option>
-            <option value="Accountant">Kế toán viên</option>
-            <option value="IT Support">Hỗ trợ CNTT</option>
+            <option value="Quản lý">Quản lý</option>
+            <option value="Cộng tác viên bán hàng">
+              Cộng tác viên bán hàng
+            </option>
+            <option value="Nhân viên kho">Nhân viên kho</option>
+            <option value="Dịch vụ khách hàng">Dịch vụ khách hàng</option>
+            <option value="Kế toán viên">Kế toán viên</option>
+            <option value="Hỗ trợ CNTT">Hỗ trợ CNTT</option>
             <option value="Logistics">Logistics</option>
-            <option value="Marketing">Tiếp thị</option>
-            <option value="HR Specialist">Chuyên gia nhân sự</option>
-            <option value="Business Analyst">Nhà phân tích kinh doanh</option>
+            <option value="Tiếp thị">Tiếp thị</option>
+            <option value="Chuyên gia nhân sự">Chuyên gia nhân sự</option>
+            <option value="Nhà phân tích kinh doanh">
+              Nhà phân tích kinh doanh
+            </option>
           </select>
         </div>
 
@@ -209,6 +215,17 @@ const EditEmployee = () => {
           >
             Lưu
           </button>
+        </div>
+
+        <div className="text-start mt-3">
+          <Button
+            type="primary"
+            onClick={() =>
+              navigate("/admin/employee-list", { state: { searchText } })
+            }
+          >
+            Quay lại Danh Sách Nhân Viên
+          </Button>
         </div>
       </form>
     </div>

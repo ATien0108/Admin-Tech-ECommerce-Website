@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, notification, Popconfirm } from "antd";
+import { Table, Input, notification, Popconfirm, Dropdown, Menu } from "antd";
 import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "antd/dist/reset.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -9,9 +9,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const { Search } = Input;
 
 const Customerslist = () => {
-  const [searchText, setSearchText] = useState("");
   const [data, setData] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchText, setSearchText] = useState(
+    location.state?.searchText || ""
+  );
+  const [searchHistory, setSearchHistory] = useState([]);
 
   // Function to fetch users from the API
   const fetchUsers = async () => {
@@ -37,11 +41,15 @@ const Customerslist = () => {
   }, []);
 
   const handleEdit = (record) => {
-    navigate(`/admin/edit-customer/${record.id}`);
+    navigate(`/admin/edit-customer/${record.id}`, {
+      state: { searchText }, // Truyền trạng thái searchText
+    });
   };
 
   const handleView = (record) => {
-    navigate(`/admin/customer-detail/${record.id}`);
+    navigate(`/admin/customer-detail/${record.id}`, {
+      state: { searchText },
+    });
   };
 
   const handleDelete = async (record) => {
@@ -71,6 +79,25 @@ const Customerslist = () => {
       });
     }
   };
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+
+    if (value && !searchHistory.includes(value)) {
+      // Cập nhật lịch sử tìm kiếm nếu giá trị mới
+      setSearchHistory((prevHistory) => [value, ...prevHistory].slice(0, 5)); // Lưu tối đa 5 lịch sử
+    }
+  };
+
+  const menu = (
+    <Menu>
+      {searchHistory.map((item, index) => (
+        <Menu.Item key={index} onClick={() => setSearchText(item)}>
+          {item}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   const filteredData = data.filter((item) =>
     item.username.toLowerCase().includes(searchText.toLowerCase())
@@ -110,18 +137,6 @@ const Customerslist = () => {
       align: "center",
     },
     {
-      title: "Địa chỉ",
-      render: (text, record) => (
-        <span style={{ textAlign: "left" }}>
-          {record.address.street}, {record.address.communes},{" "}
-          {record.address.district}, {record.address.city},{" "}
-          {record.address.country}
-        </span>
-      ),
-      align: "center",
-      width: "30%",
-    },
-    {
       title: "Hành động",
       render: (text, record) => (
         <div>
@@ -149,19 +164,26 @@ const Customerslist = () => {
 
   return (
     <div className="container mt-4">
-      <h3 className="mb-4 title">Danh Sách Khách hàng</h3>
+      <h3 className="mb-4 title">Danh Sách Khách Hàng</h3>
       <div className="d-flex justify-content-between mb-3">
-        <Search
-          placeholder="Tìm kiếm theo tên người dùng"
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 300 }}
-        />
+        <Dropdown overlay={menu} trigger={["click"]}>
+          <div>
+            <Search
+              placeholder="Tìm kiếm theo tên khách hàng"
+              value={searchText}
+              onSearch={handleSearch}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ width: 300 }}
+            />
+          </div>
+        </Dropdown>
       </div>
       <div className="table-responsive">
         <Table
           columns={columns}
           dataSource={filteredData}
           pagination={{ pageSize: 10 }}
+          rowKey="id"
         />
       </div>
     </div>

@@ -4,7 +4,7 @@ import "react-quill/dist/quill.snow.css";
 import { message, Select, Button } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -18,6 +18,8 @@ const AddBlog = () => {
   const [authors, setAuthors] = useState([]);
   const [blogs, setBlogs] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -209,6 +211,16 @@ const AddBlog = () => {
             <button className="btn btn-success" type="submit">
               Thêm
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/blog-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Bài Viết
+            </Button>
           </div>
         </div>
       </form>

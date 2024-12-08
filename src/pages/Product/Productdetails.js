@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Col, Row } from "antd";
-import { useParams } from "react-router-dom";
+import { Card, Col, Row, Button } from "antd";
+import { useParams, useNavigate } from "react-router-dom";
 import ReactStars from "react-rating-stars-component";
 
 const Productdetails = () => {
@@ -10,6 +10,7 @@ const Productdetails = () => {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]); // Reviews state
   const [users, setUsers] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -266,6 +267,13 @@ const Productdetails = () => {
           <p>Không có đánh giá.</p>
         )}
       </Card>
+      <Button
+        type="primary"
+        style={{ marginBottom: "20px", marginTop: "20px", float: "left" }}
+        onClick={() => navigate("/admin/product-list")}
+      >
+        Quay lại Danh Sách Sản Phẩm
+      </Button>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { message } from "antd";
+import { message, Button } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -208,9 +208,22 @@ const AddAdvertisement = () => {
         </div>
 
         <div className="text-center">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? "Đang thêm..." : "Thêm Quảng Cáo"}
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ backgroundColor: "#28a745", borderColor: "#28a745" }}
+          >
+            {loading ? "Đang thêm..." : "Thêm"}
           </button>
+        </div>
+        <div className="text-start mt-5">
+          <Button
+            type="primary"
+            onClick={() => navigate("/admin/advertisement-list")}
+          >
+            Quay lại Danh Sách Quảng Cáo
+          </Button>
         </div>
       </form>
     </div>

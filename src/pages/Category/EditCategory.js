@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { message, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const EditCategory = () => {
@@ -17,6 +17,8 @@ const EditCategory = () => {
   });
 
   const [previewImage, setPreviewImage] = useState(""); // URL ảnh hiện tại
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Lấy dữ liệu danh mục từ API khi component được render
   useEffect(() => {
@@ -229,6 +231,16 @@ const EditCategory = () => {
             <button type="submit" className="btn btn-success">
               Lưu
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/category-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Danh Mục
+            </Button>
           </div>
         </div>
       </form>

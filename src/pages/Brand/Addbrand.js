@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { message } from "antd";
+import { message, Button } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const AddBrand = () => {
   const [brandName, setBrandName] = useState("");
@@ -9,6 +9,8 @@ const AddBrand = () => {
   const [brandImage, setBrandImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Handle image upload
   const handleImageUpload = async (e) => {
@@ -128,6 +130,13 @@ const AddBrand = () => {
           </div>
         </div>
       </form>
+      <Button
+        type="primary"
+        style={{ marginBottom: "20px", marginTop: "20px", float: "left" }}
+        onClick={() => navigate("/admin/brand-list", { state: { searchText } })}
+      >
+        Quay lại Danh Sách Thương Hiệu
+      </Button>
     </div>
   );
 };

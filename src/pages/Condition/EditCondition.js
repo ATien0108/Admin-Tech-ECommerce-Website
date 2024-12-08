@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { message, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const EditCondition = () => {
@@ -14,6 +14,8 @@ const EditCondition = () => {
     id: null,
   });
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   useEffect(() => {
     const fetchConditionData = async () => {
@@ -173,6 +175,16 @@ const EditCondition = () => {
             <button type="submit" className="btn btn-success">
               Lưu
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/condition-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Tình Trạng
+            </Button>
           </div>
         </div>
       </form>

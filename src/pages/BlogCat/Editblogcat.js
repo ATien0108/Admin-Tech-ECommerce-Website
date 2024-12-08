@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { message, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const EditBlogCat = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // State để lưu thông tin danh mục
   const [categoryName, setCategoryName] = useState("");
@@ -144,6 +146,16 @@ const EditBlogCat = () => {
             <button className="btn btn-success" type="submit">
               Lưu
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/blog-category-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Danh Mục Bài Viết
+            </Button>
           </div>
         </div>
       </form>

@@ -3,13 +3,15 @@ import axios from "axios";
 import "react-quill/dist/quill.snow.css"; // Import style của ReactQuill
 import { Button, message } from "antd";
 import ReactQuill from "react-quill";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate, useLocation } from "react-router-dom"; // Import useNavigate
 
 const AddPolicy = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
   const navigate = useNavigate(); // Khởi tạo useNavigate
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   const handleCheckTitleExists = async (title) => {
     try {
@@ -119,8 +121,23 @@ const AddPolicy = () => {
 
       <div className="row">
         <div className="col-md-12 text-center">
-          <Button type="primary" onClick={handleSubmit}>
+          <Button
+            type="primary"
+            onClick={handleSubmit}
+            style={{ backgroundColor: "#28a745", borderColor: "#28a745" }}
+          >
             Thêm
+          </Button>
+        </div>
+
+        <div className="text-start mt-5">
+          <Button
+            type="primary"
+            onClick={() =>
+              navigate("/admin/policies", { state: { searchText } })
+            }
+          >
+            Quay lại Danh Sách Chính Sách
           </Button>
         </div>
       </div>

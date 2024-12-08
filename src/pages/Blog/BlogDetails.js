@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Card, Spin } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { Card, Spin, Button } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 
@@ -12,6 +12,8 @@ const BlogDetails = () => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Hàm lấy thông tin tác giả
   const fetchAuthorName = async (authorId) => {
@@ -169,6 +171,16 @@ const BlogDetails = () => {
             <li className="list-group-item">Chưa có bình luận nào.</li>
           )}
         </ul>
+      </div>
+      <div className="text-start mt-5">
+        <Button
+          type="primary"
+          onClick={() =>
+            navigate("/admin/blog-list", { state: { searchText } })
+          }
+        >
+          Quay lại Danh Bài Viết
+        </Button>
       </div>
     </div>
   );

@@ -316,8 +316,18 @@ const EditAbout = () => {
             </div>
           </div>
           <div className="text-center">
-            <Button type="primary" onClick={handleSubmit} loading={loading}>
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              loading={loading}
+              style={{ backgroundColor: "#28a745", borderColor: "#28a745" }} // Màu xanh lá
+            >
               Lưu
+            </Button>
+          </div>
+          <div className="text-start mt-5">
+            <Button type="primary" onClick={() => navigate("/admin/about")}>
+              Quay lại Giới Thiệu
             </Button>
           </div>
         </Form>

@@ -28,7 +28,7 @@ const Dashboard = () => {
 
         // Lọc các đơn hàng có trạng thái "Delivered"
         const deliveredOrders = allOrders.filter(
-          (order) => order.status === "Delivered"
+          (order) => order.status === "Đã giao hàng"
         );
 
         setOrders(deliveredOrders);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { message, Button, Select } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const { Option } = Select;
 
@@ -25,6 +25,8 @@ const AddProduct = () => {
   const [conditions, setConditions] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [ratings, setRatings] = useState({ average: 0, totalReviews: 0 });
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   const navigate = useNavigate();
 
@@ -529,8 +531,23 @@ const AddProduct = () => {
         </div>
 
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <Button type="primary" htmlType="submit" className="mt-3">
-            Thêm Sản Phẩm
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="mt-3"
+            style={{ backgroundColor: "#28a745", borderColor: "#28a745" }}
+          >
+            Thêm
+          </Button>
+        </div>
+        <div className="text-start mt-5">
+          <Button
+            type="primary"
+            onClick={() =>
+              navigate("/admin/product-list", { state: { searchText } })
+            }
+          >
+            Quay lại Danh Sách Sản Phẩm
           </Button>
         </div>
       </form>

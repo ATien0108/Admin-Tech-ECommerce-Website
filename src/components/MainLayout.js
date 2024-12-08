@@ -32,7 +32,7 @@ const MainLayout = () => {
     <Layout>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="logo">
-          <h2 className="text-center fs-5 py-3 mb-0">SHOP</h2>
+          <h2 className="text-center fs-5 py-3 mb-0">PTTech</h2>
         </div>
         <Menu
           theme="dark"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { message, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const EditBrand = () => {
@@ -17,6 +17,8 @@ const EditBrand = () => {
   });
 
   const [previewImage, setPreviewImage] = useState(""); // URL ảnh hiện tại
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Lấy dữ liệu thương hiệu từ API khi component được render
   useEffect(() => {
@@ -230,6 +232,12 @@ const EditBrand = () => {
           </div>
         </div>
       </form>
+      <Button
+        type="primary"
+        onClick={() => navigate("/admin/brand-list", { state: { searchText } })}
+      >
+        Quay lại Danh Sách Thương Hiệu
+      </Button>
     </div>
   );
 };

@@ -10,6 +10,9 @@ import {
   Popconfirm,
   notification,
   Spin,
+  Select,
+  Menu,
+  Dropdown,
 } from "antd";
 import {
   EditOutlined,
@@ -24,6 +27,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import debounce from "lodash.debounce";
 
 const { Content, Sider } = Layout;
+const { Option } = Select;
+const { Search } = Input;
 
 // Columns configuration for the Ant Design Table
 
@@ -42,6 +47,7 @@ const Productlist = () => {
   const [condition, setCondition] = useState([]); // State to hold conditions
   const [conditions, setConditions] = useState([]); // State to hold conditions
   const [searchText, setSearchText] = useState("");
+  const [searchHistory, setSearchHistory] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
     categories: [],
     brands: [],
@@ -162,6 +168,11 @@ const Productlist = () => {
 
   const handleSearch = debounce((value) => {
     setSearchText(value);
+
+    // Update search history
+    if (value && !searchHistory.includes(value)) {
+      setSearchHistory((prevHistory) => [value, ...prevHistory].slice(0, 5)); // Keep only the latest 5 searches
+    }
   }, 300);
 
   const handleFilterChange = (category, value) => {
@@ -180,7 +191,7 @@ const Productlist = () => {
   };
 
   const handleEdit = (record) => {
-    navigate(`/admin/edit-product/${record.id}`); // Use record.id to navigate
+    navigate(`/admin/edit-product/${record.id}`, { state: { searchText } }); // Use record.id to navigate
   };
 
   const handleDelete = async (record) => {
@@ -209,36 +220,44 @@ const Productlist = () => {
   };
 
   const handleAddProduct = () => {
-    navigate("/admin/add-product");
+    navigate("/admin/add-product", { state: { searchText } });
   };
 
   const handleView = (record) => {
-    navigate(`/admin/product-detail/${record.productName}`); // Use record.id to navigate
+    navigate(`/admin/product-detail/${record.productName}`, {
+      state: { searchText },
+    }); // Use record.id to navigate
   };
 
   const getColumns = (onEdit, onDelete, onView) => [
     {
       title: "STT",
       dataIndex: "key",
-      render: (_, __, index) => index + 1, // Display the row index as the No.
+      align: "center",
     },
     {
-      title: "Tên sản phẩm",
+      title: <div style={{ textAlign: "center" }}>Tên sản phẩm</div>,
       dataIndex: "productName",
+      width: 20,
+      render: (text) => <div style={{ textAlign: "left" }}>{text}</div>,
     },
     {
       title: "Danh mục",
       dataIndex: "category",
       render: (categoryId) => category[categoryId] || "Unknown",
+      align: "center",
     },
     {
       title: "Thương hiệu",
       dataIndex: "brand",
       render: (brandId) => brand[brandId] || "Unknown",
+      align: "center",
     },
     {
       title: "Nhãn",
       dataIndex: "tags",
+      align: "center",
+      width: 200,
       render: (tagIds) => {
         const tagsToShow = Array.isArray(tagIds) ? tagIds.slice(0, 3) : [];
         const showMore = tagIds.length > 3;
@@ -285,15 +304,18 @@ const Productlist = () => {
       title: "Giá gốc",
       dataIndex: "price",
       render: (price) => `${formatCurrency(price)} `, // Format price for readability
+      align: "center",
     },
     {
       title: "Giá giảm",
       dataIndex: "discountPrice",
       render: (discountPrice) => `${formatCurrency(discountPrice)}`, // Format price for readability
+      align: "center",
     },
     {
       title: "Ảnh chính",
       dataIndex: "mainImage",
+      align: "center",
       render: (image) => (
         <img src={image} alt="Product" style={{ width: 50, height: 50 }} />
       ),
@@ -350,8 +372,20 @@ const Productlist = () => {
       (selectedFilters.conditions.length === 0 ||
         selectedFilters.conditions.includes(item.condition));
 
+    // Combine search by product name and other filters
     return matchesSearch && matchesFilters;
   });
+
+  // Render search history menu
+  const menu = (
+    <Menu>
+      {searchHistory.map((item, index) => (
+        <Menu.Item key={index} onClick={() => handleSearch(item)}>
+          {item}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   const clearFilters = () => {
     setSelectedFilters({
@@ -366,152 +400,6 @@ const Productlist = () => {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider
-        width={300}
-        style={{ height: "100%" }}
-        className="site-layout-background"
-      >
-        <div
-          className="container-fluid p-3 bg-white shadow-sm rounded"
-          style={{ borderRadius: "0.5rem", height: "100%" }}
-        >
-          <Input
-            placeholder="Search"
-            onChange={(e) => handleSearch(e.target.value)}
-            className="mb-3"
-            style={{ bordercolors: "#1890ff" }}
-          />
-          <div className="mb-3">
-            <h4 className="text-primary">Khoảng giá</h4>
-            <Slider
-              range
-              value={priceRange}
-              min={0}
-              max={50000000}
-              step={1000000}
-              onChange={handleSliderChange}
-              tooltip={{
-                formatter: (value) => `${formatCurrency(value)}`,
-              }}
-              className="mb-2"
-            />
-
-            <div>
-              <span>
-                Selected range: {formatCurrency(priceRange[0])} -{" "}
-                {formatCurrency(priceRange[1])}
-              </span>
-            </div>
-          </div>
-
-          {/* Render categories checkboxes */}
-          <div className="mb-3">
-            <h4 className="text-primary">Danh mục</h4>
-            <div className="d-flex flex-wrap">
-              {categories.map((category) => (
-                <div key={category.id} className="me-3 mb-2">
-                  <Checkbox
-                    checked={selectedFilters.categories.includes(category.id)}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "categories",
-                        e.target.checked
-                          ? [...selectedFilters.categories, category.id]
-                          : selectedFilters.categories.filter(
-                              (c) => c !== category.id
-                            )
-                      )
-                    }
-                  >
-                    {category.cateName}
-                  </Checkbox>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Render brands checkboxes */}
-          <div className="mb-3">
-            <h4 className="text-primary">Thương hiệu</h4>
-            <div className="d-flex flex-wrap">
-              {brands.map((brand) => (
-                <div key={brand.id} className="me-3 mb-2">
-                  <Checkbox
-                    checked={selectedFilters.brands.includes(brand.id)}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "brands",
-                        e.target.checked
-                          ? [...selectedFilters.brands, brand.id]
-                          : selectedFilters.brands.filter((b) => b !== brand.id)
-                      )
-                    }
-                  >
-                    {brand.brandName}
-                  </Checkbox>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Render tags checkboxes */}
-          <div className="mb-3">
-            <h4 className="text-primary">Thẻ</h4>
-            <div className="d-flex flex-wrap">
-              {tagsfill.map((tag) => (
-                <div key={tag.id} className="me-3 mb-2">
-                  <Checkbox
-                    checked={selectedFilters.tags.includes(tag.id)}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "tags",
-                        e.target.checked
-                          ? [...selectedFilters.tags, tag.id]
-                          : selectedFilters.tags.filter((t) => t !== tag.id)
-                      )
-                    }
-                  >
-                    {tag.name}
-                  </Checkbox>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Render conditions checkboxes */}
-          <div className="mb-3">
-            <h4 className="text-primary">Tình trạng</h4>
-            <div className="d-flex flex-wrap">
-              {conditions.map((condition) => (
-                <div key={condition.id} className="me-3 mb-2">
-                  <Checkbox
-                    checked={selectedFilters.conditions.includes(condition.id)}
-                    onChange={(e) =>
-                      handleFilterChange(
-                        "conditions",
-                        e.target.checked
-                          ? [...selectedFilters.conditions, condition.id]
-                          : selectedFilters.conditions.filter(
-                              (c) => c !== condition.id
-                            )
-                      )
-                    }
-                  >
-                    {condition.conditionName}
-                  </Checkbox>
-                </div>
-              ))}
-            </div>
-          </div>
-          <Button
-            onClick={clearFilters}
-            className="mb-3"
-            style={{ width: "100%" }}
-          >
-            Clear Filters
-          </Button>
-        </div>
-      </Sider>
       <Layout style={{ padding: "0 24px 24px" }}>
         <Content
           style={{
@@ -522,9 +410,138 @@ const Productlist = () => {
             borderRadius: "0.5rem",
           }}
         >
-          <h3 className="mb-4 title">Danh Sách Sản Phẩm</h3>
+          {/* Các bộ lọc nằm ngang */}
+          <div
+            className="filter-container mb-3"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+              marginBottom: "10px",
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <h4 className="text-primary">Khoảng giá</h4>
+              <Slider
+                range
+                value={priceRange}
+                min={0}
+                max={50000000}
+                step={1000000}
+                onChange={handleSliderChange}
+                tooltip={{
+                  formatter: (value) => `${formatCurrency(value)}`,
+                }}
+              />
+              <div>
+                <span>
+                  Chọn khoảng giá: {formatCurrency(priceRange[0])} -{" "}
+                  {formatCurrency(priceRange[1])}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h4 className="text-primary">Danh mục</h4>
+              <Select
+                mode="multiple"
+                value={selectedFilters.categories}
+                onChange={(value) => handleFilterChange("categories", value)}
+                placeholder="Chọn danh mục"
+                style={{ width: "100%" }}
+                size="small"
+              >
+                {categories.map((category) => (
+                  <Option key={category.id} value={category.id}>
+                    {category.cateName}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h4 className="text-primary">Thương hiệu</h4>
+              <Select
+                mode="multiple"
+                value={selectedFilters.brands}
+                onChange={(value) => handleFilterChange("brands", value)}
+                placeholder="Chọn thương hiệu"
+                style={{ width: "100%" }}
+                size="small"
+              >
+                {brands.map((brand) => (
+                  <Option key={brand.id} value={brand.id}>
+                    {brand.brandName}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h4 className="text-primary">Thẻ</h4>
+              <Select
+                mode="multiple"
+                value={selectedFilters.tags}
+                onChange={(value) => handleFilterChange("tags", value)}
+                placeholder="Chọn thẻ"
+                style={{ width: "100%" }}
+                size="small"
+              >
+                {tagsfill.map((tag) => (
+                  <Option key={tag.id} value={tag.id}>
+                    {tag.name}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <h4 className="text-primary">Tình trạng</h4>
+              <Select
+                mode="multiple"
+                value={selectedFilters.conditions}
+                onChange={(value) => handleFilterChange("conditions", value)}
+                placeholder="Chọn tình trạng"
+                style={{ width: "100%" }}
+                size="small"
+              >
+                {conditions.map((condition) => (
+                  <Option key={condition.id} value={condition.id}>
+                    {condition.conditionName}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Clear Filters Button */}
+          </div>
+          <div style={{ flex: "0 0 auto", alignSelf: "flex-end" }}>
+            <Button
+              onClick={clearFilters}
+              className="mb-3"
+              style={{ width: "10%" }}
+              size="small"
+            >
+              Xóa bộ lọc
+            </Button>
+          </div>
+          <div className="col-md-6">
+            <Dropdown overlay={menu} trigger={["click"]}>
+              <div>
+                <Search
+                  placeholder="Tìm kiếm theo tên danh mục sản phẩm"
+                  value={searchText}
+                  onSearch={handleSearch}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  style={{ width: 300 }}
+                />
+              </div>
+            </Dropdown>
+          </div>
+
           <Button
             type="primary"
+            style={{ marginBottom: "20px", marginTop: "20px", float: "right" }}
             icon={<PlusOutlined />}
             onClick={handleAddProduct}
           >
@@ -534,10 +551,10 @@ const Productlist = () => {
             <Spin size="large" />
           ) : (
             <Table
-              columns={getColumns(handleEdit, handleDelete, handleView)} // Pass necessary functions as arguments
+              columns={getColumns(handleEdit, handleDelete, handleView)}
               dataSource={filteredData}
               pagination={{ pageSize: 10 }}
-              rowKey="key" // Ensure a unique key prop for each row
+              rowKey="key"
               scroll={{ x: "max-content" }}
             />
           )}

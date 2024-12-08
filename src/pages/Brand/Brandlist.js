@@ -8,17 +8,25 @@ import {
   notification,
   Modal,
   Spin,
+  Dropdown,
+  Menu,
 } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
+const { Search } = Input;
+
 const Brandlist = () => {
-  const [searchText, setSearchText] = useState("");
   const [brands, setBrands] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false); // Trạng thái loading
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchText, setSearchText] = useState(
+    location.state?.searchText || ""
+  );
+  const [searchHistory, setSearchHistory] = useState([]);
 
   // Format ngày
   const formatDate = (dateString) => {
@@ -52,19 +60,43 @@ const Brandlist = () => {
   };
 
   // Xử lý tìm kiếm
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
+  const handleSearch = (value) => {
     setSearchText(value);
 
+    // Lọc dữ liệu theo từ khóa tìm kiếm
     const filtered = brands.filter((item) =>
-      item.brandName.toLowerCase().includes(value)
+      item.brandName.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredData(filtered);
+
+    if (value && !searchHistory.includes(value)) {
+      // Cập nhật lịch sử tìm kiếm nếu giá trị mới
+      setSearchHistory((prevHistory) => [value, ...prevHistory].slice(0, 5)); // Lưu tối đa 5 lịch sử
+    }
   };
+
+  useEffect(() => {
+    const filtered = brands.filter((item) =>
+      item.brandName.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [searchText, brands]);
+
+  const menu = (
+    <Menu>
+      {searchHistory.map((item, index) => (
+        <Menu.Item key={index} onClick={() => setSearchText(item)}>
+          {item}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
   // Xử lý chỉnh sửa
   const handleEdit = (record) => {
-    navigate(`/admin/edit-brand/${record.brandName}`);
+    navigate(`/admin/edit-brand/${record.brandName}`, {
+      state: { searchText },
+    });
   };
 
   // Xử lý xóa thương hiệu
@@ -133,7 +165,7 @@ const Brandlist = () => {
 
   // Chuyển đến trang thêm thương hiệu
   const handleAddBrand = () => {
-    navigate("/admin/add-brand");
+    navigate("/admin/add-brand", { state: { searchText } });
   };
 
   const columns = [
@@ -222,12 +254,17 @@ const Brandlist = () => {
       <h3 className="mb-4 title">Danh Sách Thương Hiệu</h3>
       <div className="row mb-3">
         <div className="col-md-6">
-          <Input
-            placeholder="Tìm kiếm theo tên thương hiệu"
-            value={searchText}
-            onChange={handleSearch}
-            style={{ width: 300 }}
-          />
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <div>
+              <Search
+                placeholder="Tìm kiếm theo tên thương hiệu"
+                value={searchText}
+                onSearch={handleSearch}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300 }}
+              />
+            </div>
+          </Dropdown>
         </div>
         <div className="col-md-6 text-end">
           <Button type="primary" onClick={handleAddBrand}>

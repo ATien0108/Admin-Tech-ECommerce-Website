@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { message, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const EditTag = () => {
@@ -11,6 +11,8 @@ const EditTag = () => {
   const [updatedAt, setUpdatedAt] = useState("");
   const [tagId, setTagId] = useState(null);
   const [existingTags, setExistingTags] = useState([]);
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   useEffect(() => {
     // Tìm kiếm nhãn theo tên từ API
@@ -123,6 +125,16 @@ const EditTag = () => {
             <button type="submit" className="btn btn-success">
               Lưu
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/tag-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Nhãn
+            </Button>
           </div>
         </div>
       </form>

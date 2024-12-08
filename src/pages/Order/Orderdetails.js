@@ -8,10 +8,12 @@ import {
   Spin,
   message,
   Select,
+  Modal,
+  Button,
 } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css"; // Đảm bảo Bootstrap được import
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -21,6 +23,9 @@ const OrderDetails = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   const fetchProductName = async (id) => {
     try {
@@ -89,20 +94,31 @@ const OrderDetails = () => {
     fetchOrderDetails();
   }, [id]);
 
-  const handleStatusChange = async (newStatus) => {
-    setUpdating(true);
-    try {
-      const response = await axios.put(
-        `http://localhost:8081/api/orders/update-status/${id}?status=${newStatus}`
-      );
-      setOrder({ ...order, status: newStatus }); // Cập nhật trạng thái
-      message.success("Cập nhật trạng thái thành công!");
-    } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái:", error);
-      message.error("Cập nhật trạng thái thất bại.");
-    } finally {
-      setUpdating(false);
-    }
+  const handleStatusChange = (newStatus) => {
+    Modal.confirm({
+      title: "Xác nhận cập nhật trạng thái",
+      content: `Bạn có chắc chắn muốn cập nhật trạng thái đơn hàng thành "${newStatus}"?`,
+      okText: "Có",
+      cancelText: "Không",
+      onOk: async () => {
+        setUpdating(true);
+        try {
+          const response = await axios.put(
+            `http://localhost:8081/api/orders/update-status/${id}?status=${newStatus}`
+          );
+          setOrder({ ...order, status: newStatus }); // Cập nhật trạng thái
+          message.success("Cập nhật trạng thái thành công!");
+        } catch (error) {
+          console.error("Lỗi khi cập nhật trạng thái:", error);
+          message.error("Cập nhật trạng thái thất bại.");
+        } finally {
+          setUpdating(false);
+        }
+      },
+      onCancel: () => {
+        // Nếu người dùng bấm "Không", không thực hiện gì cả.
+      },
+    });
   };
 
   if (loading) {
@@ -136,24 +152,43 @@ const OrderDetails = () => {
           onChange={handleStatusChange}
           loading={updating}
         >
-          <Option value="Processing">Processing</Option>
-          <Option value="Shipped">Shipped</Option>
-          <Option value="Delivered">Delivered</Option>
+          <Option value="Đang xử lý">Đang xử lý</Option>
+          <Option value="Đang vận chuyển">Đang vận chuyển</Option>
+          <Option value="Đã giao hàng">Đã giao hàng</Option>
         </Select>
       </div>
       <Divider />
 
       {/* Thông tin người mua */}
-      <Card title="Thông tin người mua: " className="mb-3">
-        <Text strong>Tên: {order.fullName}</Text>
+      <Card title="Thông tin người mua" className="mb-3">
+        <Text strong>Tên: </Text> {order.fullName}
         <br />
-        <Text strong>Số điện thoại: {order.phoneNumber}</Text>
-        <br />
+        <div style={{ marginTop: 8 }}>
+          <Text strong>Số điện thoại: </Text> {order.phoneNumber}
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <Text strong>Địa chỉ giao hàng: </Text>
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <Text strong>Đường: </Text> {order.shippingAddress.street}
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <Text strong>Phường / Xã: </Text> {order.shippingAddress.communes}
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <Text strong>Quận / Huyện: </Text> {order.shippingAddress.district}
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <Text strong>Tỉnh / Thành phố: </Text> {order.shippingAddress.city}
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <Text strong>Quốc gia: </Text> {order.shippingAddress.country}
+        </div>
       </Card>
 
       <div className="row">
         <div className="col-lg-8 col-md-12">
-          <Card title="Sản phẩm">
+          <Card title="Thông tin đơn hàng">
             <List
               dataSource={order.items} // Chỉ hiển thị sản phẩm thuộc đơn hàng
               renderItem={(item) => {
@@ -192,6 +227,8 @@ const OrderDetails = () => {
             <div className="text-end mt-2">
               <Text>Phí vận chuyển: {formatCurrency(order.shippingCost)} </Text>
               <br />
+              <Text>Giá giảm: {formatCurrency(order.couponDiscount)} </Text>
+              <br />
               <Text strong>
                 Tổng thanh toán: {formatCurrency(order.totalAmount)}
               </Text>
@@ -209,24 +246,26 @@ const OrderDetails = () => {
           {order.coupon && (
             <Card title="Mã giảm giá" className="mt-3">
               <Text>{order.coupon}</Text>
+              <br />
+              <Text strong>Giá giảm: </Text> {order.couponDiscount}
             </Card>
           )}
-
-          <Card title="Địa chỉ giao hàng" className="mt-3">
-            <Text>
-              <div>Đường: {order.shippingAddress.street}</div>
-              <div>Phường / Xã: {order.shippingAddress.communes}</div>
-              <div>Quận / Huyện: {order.shippingAddress.district}</div>
-              <div>Tỉnh / Thành phố: {order.shippingAddress.city}</div>
-              <div>Quốc gia: {order.shippingAddress.country}</div>
-            </Text>
-          </Card>
 
           <Card title="Phương thức thanh toán" className="mt-3">
             <Text>{order.paymentMethod}</Text>
           </Card>
         </div>
       </div>
+
+      <Button
+        type="primary"
+        style={{ marginBottom: "20px", marginTop: "20px", float: "left" }}
+        onClick={() =>
+          navigate("/admin/orders-list", { state: { searchText } })
+        }
+      >
+        Quay lại Danh Sách Đơn Đặt Hàng
+      </Button>
     </div>
   );
 };

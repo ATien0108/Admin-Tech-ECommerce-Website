@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, Avatar, List, Typography, Divider, Spin } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { Card, Avatar, List, Typography, Divider, Spin, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const { Title, Text } = Typography;
@@ -10,6 +10,7 @@ const CustomerDetail = () => {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchCustomerData = async () => {
@@ -28,7 +29,7 @@ const CustomerDetail = () => {
     };
 
     fetchCustomerData();
-  }, [id, navigate]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -89,9 +90,7 @@ const CustomerDetail = () => {
           </div>
         </div>
       </Card>
-
       <Divider style={{ margin: "30px 0" }} />
-
       <Card
         title="Địa chỉ"
         style={{
@@ -116,7 +115,6 @@ const CustomerDetail = () => {
           />
         ) : (
           <div>
-            {/* Địa chỉ sẽ được hiển thị riêng biệt, mỗi phần sẽ là một dòng */}
             <div style={{ marginBottom: "10px" }}>
               <Text style={{ color: "#555" }}>
                 <strong>Đường:</strong> {customer.address?.street}
@@ -149,6 +147,17 @@ const CustomerDetail = () => {
           </div>
         )}
       </Card>
+      <Button
+        type="primary"
+        style={{ marginBottom: "20px", marginTop: "20px", float: "left" }}
+        onClick={() =>
+          navigate("/admin/customers-list", {
+            state: { searchText: location.state?.searchText || "" },
+          })
+        }
+      >
+        Quay lại Danh Sách Khách Hàng
+      </Button>
     </div>
   );
 };

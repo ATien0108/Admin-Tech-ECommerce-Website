@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
+import { message, Button } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const AddBlogCat = () => {
   const [categoryName, setCategoryName] = useState("");
   const [categoryDesc, setCategoryDesc] = useState("");
   const [existingCategories, setExistingCategories] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Lấy danh sách các danh mục hiện có khi component được render lần đầu
   useEffect(() => {
@@ -103,6 +105,16 @@ const AddBlogCat = () => {
             <button className="btn btn-success" type="submit">
               Thêm
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/blog-category-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Danh Mục Bài Viết
+            </Button>
           </div>
         </div>
       </form>

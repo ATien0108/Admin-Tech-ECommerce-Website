@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, message } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const EditPolicy = () => {
@@ -13,6 +13,8 @@ const EditPolicy = () => {
   const [content, setContent] = useState("");
   const [createdAt, setCreatedAt] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Lấy thông tin chính sách hiện tại
   useEffect(() => {
@@ -166,8 +168,22 @@ const EditPolicy = () => {
         </div>
         <div className="row">
           <div className="col-md-12 text-center">
-            <Button type="primary" htmlType="submit">
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{ backgroundColor: "#28a745", borderColor: "#28a745" }}
+            >
               Lưu
+            </Button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/policies", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Chính Sách
             </Button>
           </div>
         </div>

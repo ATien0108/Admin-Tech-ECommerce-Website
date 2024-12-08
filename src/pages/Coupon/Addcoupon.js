@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { message } from "antd";
+import { message, Button } from "antd";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const AddCoupon = () => {
   const [couponCode, setCouponCode] = useState("");
@@ -17,22 +17,92 @@ const AddCoupon = () => {
   const [isActive, setIsActive] = useState(true); // State for isActive
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   // Handle discount type change
   const handleDiscountTypeChange = (e) => {
-    setDiscountType(e.target.value);
-    if (e.target.value === "PERCENTAGE") {
-      setDiscountValue(1); // Reset discountValue to 1 for percentage
+    const type = e.target.value;
+    setDiscountType(type);
+
+    if (type === "PERCENTAGE") {
+      setDiscountValue(1); // Đặt giá trị mặc định
     } else {
-      setDiscountValue(10000); // Reset discountValue to a default fixed amount
+      setDiscountValue(10000); // Giá trị mặc định cho loại FIXED
     }
+  };
+
+  const handleDiscountValueChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    if (discountType === "PERCENTAGE") {
+      setDiscountValue(Math.min(Math.max(1, value), 100)); // Giá trị phải trong khoảng 1-100
+    } else {
+      setDiscountValue(Math.max(0, value)); // Giá trị không được âm
+    }
+  };
+
+  const handleMaxDiscountAmountChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    setMaxDiscountAmount(Math.max(0, value)); // Giá trị không được âm
+  };
+
+  const handleMinimumOrderAmountChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    setMinimumOrderAmount(Math.max(0, value)); // Giá trị không được âm
+  };
+
+  const handleUsageLimitChange = (e) => {
+    const value = parseInt(e.target.value, 10);
+    setUsageLimit(Math.max(0, value)); // Giá trị không được âm
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Log giá trị isActive để kiểm tra
-    console.log("Giá trị isActive:", isActive); // Log ra isActive
+    // Kiểm tra các ràng buộc
+    if (
+      discountValue < 1 ||
+      (discountType === "PERCENTAGE" && discountValue > 100)
+    ) {
+      message.error(
+        "Giá trị giảm giá (PERCENTAGE) phải nằm trong khoảng 1 đến 100."
+      );
+      return;
+    }
+
+    if (
+      discountValue < 0 ||
+      maxDiscountAmount < 0 ||
+      minimumOrderAmount < 0 ||
+      usageLimit < 0
+    ) {
+      message.error(
+        "Giá trị giảm giá, Số tiền giảm tối đa, Số tiền đơn hàng tối thiểu và Giới hạn sử dụng không được là số âm."
+      );
+      return;
+    }
+
+    if (discountType === "FIXED") {
+      if (maxDiscountAmount > discountValue) {
+        message.error(
+          "Số tiền giảm tối đa không được lớn hơn Giá trị giảm giá khi loại giảm giá là FIXED."
+        );
+        return;
+      }
+      if (discountValue >= minimumOrderAmount) {
+        message.error(
+          "Giá trị giảm giá phải nhỏ hơn Số tiền đơn hàng tối thiểu khi loại giảm giá là FIXED."
+        );
+        return;
+      }
+    }
+
+    if (maxDiscountAmount > minimumOrderAmount) {
+      message.error(
+        "Số tiền giảm tối đa phải nhỏ hơn hoặc bằng Số tiền đơn hàng tối thiểu."
+      );
+      return;
+    }
 
     const couponData = {
       code: couponCode,
@@ -45,10 +115,8 @@ const AddCoupon = () => {
       endDate: new Date(endDate),
       usageLimit: usageLimit || 0,
       usageCount: usageCount,
-      active: isActive, // Đảm bảo isActive được truyền đúng
+      active: isActive,
     };
-
-    console.log("couponData before sending:", couponData);
 
     try {
       setIsLoading(true);
@@ -107,8 +175,8 @@ const AddCoupon = () => {
               onChange={handleDiscountTypeChange}
               required
             >
-              <option value="PERCENTAGE">PERCENTAGE</option>
-              <option value="FIXED">FIXED</option>
+              <option value="PERCENTAGE">Phần trăm</option>
+              <option value="FIXED">Số tiền cố định</option>
             </select>
           </div>
           <div className="col-md-6 mb-3">
@@ -120,26 +188,41 @@ const AddCoupon = () => {
               id="discountValue"
               className="form-control"
               value={discountValue}
-              onChange={(e) => setDiscountValue(e.target.value)}
-              min={discountType === "PERCENTAGE" ? 1 : 10000}
-              max={discountType === "PERCENTAGE" ? 100 : 1000000}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                if (
+                  discountType === "PERCENTAGE" &&
+                  (value < 1 || value > 100)
+                ) {
+                  message.error(
+                    "Giá trị giảm giá (PERCENTAGE) phải nằm trong khoảng 1 đến 100."
+                  );
+                  return;
+                }
+                if (value < 0) {
+                  message.error("Giá trị giảm giá không được là số âm.");
+                  return;
+                }
+                setDiscountValue(value);
+              }}
+              min={discountType === "PERCENTAGE" ? 1 : 0}
+              max={discountType === "PERCENTAGE" ? 100 : undefined}
               required
             />
           </div>
-          {discountType === "PERCENTAGE" && (
-            <div className="col-md-6 mb-3">
-              <label htmlFor="maxDiscountAmount" className="form-label">
-                Số tiền giảm tối đa
-              </label>
-              <input
-                type="number"
-                id="maxDiscountAmount"
-                className="form-control"
-                value={maxDiscountAmount}
-                onChange={(e) => setMaxDiscountAmount(e.target.value)}
-              />
-            </div>
-          )}
+          <div className="col-md-6 mb-3">
+            <label htmlFor="maxDiscountAmount" className="form-label">
+              Số tiền giảm tối đa
+            </label>
+            <input
+              type="number"
+              id="maxDiscountAmount"
+              className="form-control"
+              value={maxDiscountAmount}
+              onChange={handleMaxDiscountAmountChange}
+            />
+          </div>
+
           <div className="col-md-6 mb-3">
             <label htmlFor="minimumOrderAmount" className="form-label">
               Số tiền đơn hàng tối thiểu
@@ -149,8 +232,7 @@ const AddCoupon = () => {
               id="minimumOrderAmount"
               className="form-control"
               value={minimumOrderAmount}
-              onChange={(e) => setMinimumOrderAmount(e.target.value)}
-              required
+              onChange={handleMinimumOrderAmountChange}
             />
           </div>
           <div className="col-md-6 mb-3">
@@ -188,7 +270,7 @@ const AddCoupon = () => {
               id="usageLimit"
               className="form-control"
               value={usageLimit}
-              onChange={(e) => setUsageLimit(e.target.value)}
+              onChange={handleUsageLimitChange}
               required
             />
           </div>
@@ -227,10 +309,26 @@ const AddCoupon = () => {
             <button
               type="submit"
               className="btn btn-success"
-              disabled={isLoading}
+              disabled={
+                isLoading || // Đang tải
+                discountValue < 1 ||
+                (discountType === "PERCENTAGE" && discountValue > 100) ||
+                maxDiscountAmount > minimumOrderAmount ||
+                (discountType === "FIXED" && maxDiscountAmount > discountValue)
+              }
             >
               {isLoading ? "Đang thêm..." : "Thêm"}
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate("/admin/coupon-list", { state: { searchText } })
+              }
+            >
+              Quay lại Danh Sách Mã Giảm Giá
+            </Button>
           </div>
         </div>
       </form>

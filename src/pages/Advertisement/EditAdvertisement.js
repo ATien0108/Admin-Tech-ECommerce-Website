@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { message } from "antd";
+import { message, Button } from "antd";
 
 const EditAdvertisement = () => {
   const { id } = useParams(); // Fetch the advertisement ID from the URL
@@ -257,9 +257,18 @@ const EditAdvertisement = () => {
               type="submit"
               className="btn btn-success"
               disabled={loading}
+              style={{ backgroundColor: "#28a745", borderColor: "#28a745" }}
             >
-              {loading ? "Đang cập nhật..." : "Lưu Thay Đổi"}
+              {loading ? "Đang cập nhật..." : "Lưu"}
             </button>
+          </div>
+          <div className="text-start mt-5">
+            <Button
+              type="primary"
+              onClick={() => navigate("/admin/advertisement-list")}
+            >
+              Quay lại Danh Sách Quảng Cáo
+            </Button>
           </div>
         </form>
       )}

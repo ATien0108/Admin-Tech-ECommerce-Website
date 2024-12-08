@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { message, Button, Select } from "antd";
 import axios from "axios";
 
@@ -26,6 +26,8 @@ const EditProduct = () => {
   const [selectedCondition, setSelectedCondition] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [createdAt, setCreatedAt] = useState("");
+  const location = useLocation();
+  const searchText = location.state?.searchText || "";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -461,8 +463,23 @@ const EditProduct = () => {
         </div>
 
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <Button type="primary" htmlType="submit" className="mt-3">
-            Cập Nhật Sản Phẩm
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="mt-3"
+            style={{ backgroundColor: "#28a745", borderColor: "#28a745" }} // Màu xanh lá
+          >
+            Lưu
+          </Button>
+        </div>
+        <div className="text-start mt-5">
+          <Button
+            type="primary"
+            onClick={() =>
+              navigate("/admin/product-list", { state: { searchText } })
+            }
+          >
+            Quay lại Danh Sách Sản Phẩm
           </Button>
         </div>
       </form>

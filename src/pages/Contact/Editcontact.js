@@ -3,7 +3,7 @@ import "antd/dist/reset.css"; // Nhập khẩu các kiểu của Ant Design
 import "bootstrap/dist/css/bootstrap.min.css"; // Nhập khẩu các kiểu của Bootstrap
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { message } from "antd";
+import { message, Button } from "antd";
 
 const EditContact = () => {
   const { id } = useParams();
@@ -302,9 +302,19 @@ const EditContact = () => {
         {/* Các nút hành động */}
         <div className="row">
           <div className="col-md-12 text-center">
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ backgroundColor: "#28a745", borderColor: "#28a745" }}
+            >
               Lưu
             </button>
+          </div>
+
+          <div className="text-start mt-5">
+            <Button type="primary" onClick={() => navigate("/admin/contact")}>
+              Quay lại Liên Hệ
+            </Button>
           </div>
         </div>
       </form>

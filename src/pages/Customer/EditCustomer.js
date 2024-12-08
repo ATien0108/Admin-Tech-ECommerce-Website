@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { message } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { message, Button } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const EditCustomer = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [customerData, setCustomerData] = useState({
     username: "",
@@ -23,6 +22,10 @@ const EditCustomer = () => {
 
   const [previewImage, setPreviewImage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchTextFromState = location.state?.searchText || "";
 
   useEffect(() => {
     axios
@@ -206,10 +209,20 @@ const EditCustomer = () => {
 
         {/* Nút lưu */}
         <div className="d-flex justify-content-center mt-4">
-          <button type="submit" className="btn btn-primary w-20">
-            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+          <button type="submit" className="btn btn-success w-20">
+            {loading ? "Đang lưu..." : "Lưu"}
           </button>
         </div>
+        <Button
+          type="primary"
+          onClick={() =>
+            navigate("/admin/customers-list", {
+              state: { searchText: searchTextFromState }, // Truyền lại searchText khi quay lại
+            })
+          }
+        >
+          Quay lại Danh Sách Khách Hàng
+        </Button>
       </form>
     </div>
   );
